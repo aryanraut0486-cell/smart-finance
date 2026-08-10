@@ -12,14 +12,9 @@ import {
 import API_URL from "../api";
 
 function Analytics() {
-  const [transactions, setTransactions] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const colors = [
     "#2563eb",
@@ -40,8 +35,7 @@ function Analytics() {
       setLoading(true);
       setError("");
 
-      const token =
-        localStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
       if (!token) {
         setError("Please login first.");
@@ -54,14 +48,22 @@ function Analytics() {
           method: "GET",
 
           headers: {
-            Authorization:
-              `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      const data =
-        await response.json();
+      // Check response before trying JSON
+      const contentType =
+        response.headers.get("content-type");
+
+      if (!contentType?.includes("application/json")) {
+        throw new Error(
+          "Server returned an invalid response. Please check the backend URL."
+        );
+      }
+
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
@@ -74,7 +76,10 @@ function Analytics() {
 
     } catch (error) {
       console.error(error);
-      setError(error.message);
+      setError(
+        error.message ||
+          "Failed to load analytics"
+      );
 
     } finally {
       setLoading(false);
@@ -90,21 +95,19 @@ function Analytics() {
   // EXPENSES
   // =========================
 
-  const expenses =
-    transactions.filter(
-      (transaction) =>
-        transaction.type === "expense"
-    );
+  const expenses = transactions.filter(
+    (transaction) =>
+      transaction.type === "expense"
+  );
 
   // =========================
   // INCOME
   // =========================
 
-  const income =
-    transactions.filter(
-      (transaction) =>
-        transaction.type === "income"
-    );
+  const income = transactions.filter(
+    (transaction) =>
+      transaction.type === "income"
+  );
 
   // =========================
   // CATEGORY DATA
@@ -114,7 +117,7 @@ function Analytics() {
 
   expenses.forEach((transaction) => {
     const category =
-      transaction.category;
+      transaction.category || "Other";
 
     categoryData[category] =
       (categoryData[category] || 0) +
@@ -123,36 +126,30 @@ function Analytics() {
 
   const data = Object.entries(
     categoryData
-  ).map(
-    ([category, amount]) => ({
-      category,
-      amount,
-    })
-  );
+  ).map(([category, amount]) => ({
+    category,
+    amount,
+  }));
 
   // =========================
   // TOTAL EXPENSES
   // =========================
 
-  const totalExpenses =
-    expenses.reduce(
-      (sum, transaction) =>
-        sum +
-        Number(transaction.amount),
-      0
-    );
+  const totalExpenses = expenses.reduce(
+    (sum, transaction) =>
+      sum + Number(transaction.amount),
+    0
+  );
 
   // =========================
   // TOTAL INCOME
   // =========================
 
-  const totalIncome =
-    income.reduce(
-      (sum, transaction) =>
-        sum +
-        Number(transaction.amount),
-      0
-    );
+  const totalIncome = income.reduce(
+    (sum, transaction) =>
+      sum + Number(transaction.amount),
+    0
+  );
 
   // =========================
   // BALANCE
@@ -169,8 +166,7 @@ function Analytics() {
     data.length > 0
       ? data.reduce(
           (highest, item) =>
-            item.amount >
-            highest.amount
+            item.amount > highest.amount
               ? item
               : highest
         )
@@ -182,10 +178,8 @@ function Analytics() {
 
   if (loading) {
     return (
-      <div>
-        <h2>
-          Loading analytics...
-        </h2>
+      <div className="card">
+        <h2>Loading analytics...</h2>
       </div>
     );
   }
@@ -196,16 +190,18 @@ function Analytics() {
 
   if (error) {
     return (
-      <div>
-        <h2>Analytics</h2>
+      <div className="card">
+        <div className="section-heading">
+          <h2>Analytics</h2>
 
-        <p
-          style={{
-            color: "red",
-          }}
-        >
-          {error}
-        </p>
+          <p
+            style={{
+              color: "red",
+            }}
+          >
+            {error}
+          </p>
+        </div>
       </div>
     );
   }
@@ -220,20 +216,14 @@ function Analytics() {
       {/* Header */}
 
       <div className="page-header">
-
         <div>
-
-          <h1>
-            Analytics
-          </h1>
+          <h1>Analytics</h1>
 
           <p>
             Understand your spending
             behavior
           </p>
-
         </div>
-
       </div>
 
       {/* Statistics */}
@@ -241,7 +231,6 @@ function Analytics() {
       <div className="analytics-grid">
 
         <div className="card">
-
           <span>
             Total Income
           </span>
@@ -252,11 +241,9 @@ function Analytics() {
               "en-IN"
             )}
           </h2>
-
         </div>
 
         <div className="card">
-
           <span>
             Total Expenses
           </span>
@@ -267,11 +254,9 @@ function Analytics() {
               "en-IN"
             )}
           </h2>
-
         </div>
 
         <div className="card">
-
           <span>
             Balance
           </span>
@@ -282,11 +267,9 @@ function Analytics() {
               "en-IN"
             )}
           </h2>
-
         </div>
 
         <div className="card">
-
           <span>
             Categories
           </span>
@@ -294,7 +277,6 @@ function Analytics() {
           <h2>
             {data.length}
           </h2>
-
         </div>
 
       </div>
@@ -304,7 +286,6 @@ function Analytics() {
       <div className="card analytics-chart">
 
         <div className="section-heading">
-
           <h2>
             Expense Distribution
           </h2>
@@ -312,7 +293,6 @@ function Analytics() {
           <p>
             See where your money is going
           </p>
-
         </div>
 
         {data.length === 0 ? (
@@ -353,7 +333,6 @@ function Analytics() {
 
                 {data.map(
                   (_, index) => (
-
                     <Cell
                       key={index}
                       fill={
@@ -363,7 +342,6 @@ function Analytics() {
                         ]
                       }
                     />
-
                   )
                 )}
 
@@ -425,9 +403,7 @@ function Analytics() {
                     key={item.category}
                   >
 
-                    <div
-                      className="transaction-info"
-                    >
+                    <div className="transaction-info">
 
                       <strong>
                         {item.category}
@@ -473,9 +449,7 @@ function Analytics() {
             category is{" "}
 
             <strong>
-              {
-                highestCategory.category
-              }
+              {highestCategory.category}
             </strong>.
           </p>
 

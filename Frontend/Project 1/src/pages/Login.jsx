@@ -1,4 +1,5 @@
 import { useState } from "react";
+import API_URL from "../api";
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -13,9 +14,7 @@ function Login({ onLogin }) {
     setError("");
 
     if (!email || !password) {
-      setError(
-        "Please enter your email and password."
-      );
+      setError("Please enter your email and password.");
       return;
     }
 
@@ -23,7 +22,7 @@ function Login({ onLogin }) {
       setLoading(true);
 
       const response = await fetch(
-        "http://127.0.0.1:5000/api/auth/login",
+        `${API_URL}/api/auth/login`,
         {
           method: "POST",
 
@@ -58,7 +57,7 @@ function Login({ onLogin }) {
         JSON.stringify(data.user)
       );
 
-      // Tell App.jsx login succeeded
+      // Tell App.jsx that login succeeded
       if (onLogin) {
         onLogin(data.user);
       }
@@ -66,7 +65,9 @@ function Login({ onLogin }) {
     } catch (error) {
       console.error(error);
 
-      setError(error.message);
+      setError(
+        error.message || "Something went wrong."
+      );
 
     } finally {
       setLoading(false);
@@ -82,11 +83,12 @@ function Login({ onLogin }) {
           💰
         </div>
 
-        <h1>SmartFinance</h1>
+        <h1>
+          SmartFinance
+        </h1>
 
         <p>
-          Your intelligent financial
-          companion
+          Your intelligent financial companion
         </p>
 
         {error && (
@@ -105,7 +107,9 @@ function Login({ onLogin }) {
 
         <form onSubmit={handleSubmit}>
 
-          <label>Email</label>
+          <label>
+            Email
+          </label>
 
           <input
             type="email"
@@ -116,7 +120,9 @@ function Login({ onLogin }) {
             }
           />
 
-          <label>Password</label>
+          <label>
+            Password
+          </label>
 
           <input
             type="password"
@@ -140,8 +146,7 @@ function Login({ onLogin }) {
         </form>
 
         <small>
-          Login with your SmartFinance
-          account.
+          Login with your SmartFinance account.
         </small>
 
       </div>

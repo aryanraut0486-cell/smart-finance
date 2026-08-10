@@ -6,14 +6,9 @@ import Chart from "../components/Chart";
 import API_URL from "../api";
 
 function Dashboard() {
-  const [transactions, setTransactions] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   // =========================
   // GET TRANSACTIONS
@@ -24,8 +19,7 @@ function Dashboard() {
       setLoading(true);
       setError("");
 
-      const token =
-        localStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
       if (!token) {
         setError("Please login first.");
@@ -38,11 +32,23 @@ function Dashboard() {
           method: "GET",
 
           headers: {
-            Authorization:
-              `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
+
+      const contentType =
+        response.headers.get("content-type");
+
+      if (
+        !contentType?.includes(
+          "application/json"
+        )
+      ) {
+        throw new Error(
+          "Invalid response from server."
+        );
+      }
 
       const data =
         await response.json();
@@ -58,7 +64,11 @@ function Dashboard() {
 
     } catch (error) {
       console.error(error);
-      setError(error.message);
+
+      setError(
+        error.message ||
+          "Failed to load transactions"
+      );
 
     } finally {
       setLoading(false);
@@ -116,7 +126,7 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div>
+      <div className="card">
         <h2>
           Loading dashboard...
         </h2>
@@ -130,8 +140,10 @@ function Dashboard() {
 
   if (error) {
     return (
-      <div>
-        <h2>Dashboard</h2>
+      <div className="card">
+        <h2>
+          Dashboard
+        </h2>
 
         <p
           style={{
@@ -218,15 +230,17 @@ function Dashboard() {
 
       <div className="dashboard-grid">
 
+        {/* Chart */}
+
         <div className="card">
 
           <Chart
-            transactions={
-              transactions
-            }
+            transactions={transactions}
           />
 
         </div>
+
+        {/* Smart Insight */}
 
         <div className="card insight">
 
