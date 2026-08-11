@@ -3,6 +3,8 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 
 const connectDB = require("./config/db");
+
+const authRoutes = require("./routes/authRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
 
 dotenv.config();
@@ -14,12 +16,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Home route
+// Home
 app.get("/", (req, res) => {
   res.json({
     message: "Smart Finance Backend is running 🚀",
   });
 });
+
+// Authentication routes
+app.use("/api/auth", authRoutes);
 
 // Transaction routes
 app.use("/api/transactions", transactionRoutes);
